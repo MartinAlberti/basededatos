@@ -1,55 +1,73 @@
-const SQLClient = require("./db/clients/sql.clients");
-const dbConfig = require("./db/config");
+// Prueba de fetch para el desafio
 
-const db = new SQLClient(dbConfig);
+const express = require ('express');
+const { Server: HttpServer } = require ('http');
+const { Server: SocketServer } = require ('socket.io');
+const Products = require("./model/data");
+const Messages = require ('./model/messages')
+const dbConfig = require ('./db/config')
 
-// Punto 1
+const PORT = process.env.PORT || 8080;
+const app = express();
+const httpServer = new HttpServer(app);
+const io = new SocketServer(httpServer);
+const productsDB = new Products('products', dbConfig.mariaDB);
+const messagesDB = new Messages("messages", dbConfig.sqlite)
 
-db.createTable("articulos")
-  .then(() => {
-    console.log("table created");
 
-    // Punto 2
-    const articulos = [
-      { nombre: "Calculadora", codigo: "calc-01", precio: 123.45, stock: 500 },
-      { nombre: "Televisor", codigo: "sony-01", precio: 44553.5, stock: 400 },
-      { nombre: "Televisor", codigo: "lenovo-01", precio: 1875.25, stock: 300 },
-      { nombre: "Piano", codigo: "pia-01", precio: 1244.605, stock: 200 },
-      { nombre: "Reloj", codigo: "rel-01", precio: 123.45, stock: 100 },
-    ];
-    return db.insertRecords("articulos", articulos);
-  })
-  .then(() => {
-    console.log("Records inserted correctly");
+
+
+app.use(express.static('./public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+
+const users = [];
+
+
+io.on("connection", async (socket) => {
+    console.log(`New User conected!`);
+    console.log(`User ID: ${socket.id}`)
+
+
+   const products = await productsDB.getAll();
+   socket.emit('products', products);
+
+   socket.on('newProduct', async (newProduct) => {
+       await productsDB.save(newProduct);
+       const updateProducts = await productsDB.getAll(); 
+       io.emit('products', updateProducts)      
+    });   
+
+
    
-    //Punto 3
-    return db.getRecords("articulos");
-  })
-  .then((records) => {
-    console.table(records);
 
-    //Punto4
-
-    return db.deleteRecordById("articulos", 3);
-  })
-  .then(() => {
-    console.log("Deleted correctly");
-
-    // Punto 5
-    return db.updateRecordById("articulos", 2, {
-      stock: 0,
+    socket.on("new-user", (username) => {
+     const newUser = {
+       id: socket.id,
+       username: username,
+     };
+     users.push(newUser);
     });
-  })
-  .then(() => {
-    console.log("record updated");
 
-    return db.getRecords("articulos");
-  })
-  .then((records) => {
-    console.log("final outcome");
-    console.table(records);
-  })
-  .catch((error) => console.log(error.message))
-  .finally(() => {
-    db.disconnect();
+
+    
+    const messages= await messagesDB.getMessages();
+    socket.emit("messages", messages);
+    socket.on("new-message", async (msj) => {
+        await messagesDB.addMessage({email: msj.user, message: msj.message, date: new Date().toLocaleDateString()});
+        const messagesLog = await messagesDB.getMessages();
+        io.emit("messages", {messagesLog});
+    })
+})
+
+
+
+const connectedServer = httpServer.listen(PORT, () => {
+    console.log(`🚀Server active and runing on port: ${PORT}`);
+  });
+  
+  connectedServer.on("error", (error) => {
+    console.log(`error:`, error.message);
   });

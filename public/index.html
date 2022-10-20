@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <title>SQL</title>
+  </head>
+  <body>
+    <div class="container mt-3 text-center">
+      <div>
+        <h3 >Agrega un producto</h3>
+      </div>
+      <form id="productsForm" action="/api/products" method="post">
+        <div>
+          <div class="form-group">
+            <label for="nombre" class="form-label"> Nombre: </label>
+            <br />
+            <input
+              type="text"
+              name="title"
+              id="nombre"
+              style="margin-bottom: 16px"
+              class="input-file"
+            />
+          </div >
+          <div class="form-group">
+            <label for="precio" class="form-label"> Precio: </label>
+            <br />
+            <input
+              type="number"
+              name="price"
+              id="precio"
+              style="margin-bottom: 16px"
+              step=".01"
+              class="input-file"
+            />
+          </div>
+          <div class="form-group">
+            <label for="imagen" class="form-label"> URL Imagen: </label>
+            <br />
+            <input
+              type="text"
+              name="thumbnail"
+              id="imagen"
+              style="margin-bottom: 16px"
+              class="input-file"
+            />
+          </div>
+          <div>
+            <input type="submit" value="Crear producto" class="submit-button btn btn-dark mt-3" />
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div id="products" class="container mt-3"></div>
+    <div class="container mt-3 text-center">
+    <form id="form-chat">
+      <h3 >Chat</h3>
+      <input id="username" type="text" placeholder="Username" required/>
+      <input id="text"  type="text" placeholder="" required/>
+      <button type="submit" class="btn btn-dark">Send</button>
+     
+      <div id="chat" class="div-chat container mt-3 text-start "></div>
+
+    </form>
+  </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"
+      integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="/socket.io/socket.io.js" defer></script>
+    <script src="./main.js" defer></script>
+  </body>
+</html>
