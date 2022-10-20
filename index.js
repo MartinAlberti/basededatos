@@ -6,6 +6,9 @@ const { Server: SocketServer } = require ('socket.io');
 const Products = require("./model/data");
 const Messages = require ('./model/messages')
 const dbConfig = require ('./db/config')
+const moment = require("moment");
+const time = moment().format('h: mm a')
+
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -56,7 +59,7 @@ io.on("connection", async (socket) => {
     const messages= await messagesDB.getMessages();
     socket.emit("messages", messages);
     socket.on("new-message", async (msj) => {
-        await messagesDB.addMessage({email: msj.user, message: msj.message, date: new Date().toLocaleDateString()});
+        await messagesDB.addMessage({email: msj.user, message: msj.message, date: time});
         const messagesLog = await messagesDB.getMessages();
         io.emit("messages", {messagesLog});
     })
